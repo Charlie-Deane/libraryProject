@@ -20,30 +20,56 @@ function Book(title, author, pages, read) {
 //draws the card and saves id "indexAT_<NUMBER>" pointing to index of child object in array
 Book.prototype.drawCard = function (index) {
 
-    //create all pertinent elements for card
+    //create container div for card
     cardDiv = document.createElement('div');
     cardDiv.classList.add('book');
-    cardDiv.setAttribute('id', `indexAt_${index}`);
+
+    //create text elements
     cardTitle = document.createElement('h2');
     cardTitle.classList.add('cardAttribute');
     cardAuthor = document.createElement('h2');
     cardAuthor.classList.add('cardAttribute');
     cardPages = document.createElement('h2');
     cardPages.classList.add('cardAttribute');
-    cardRead = document.createElement('h2');
-    cardRead.classList.add('cardAttribute');
+    
+    //create controls for the car under the following heirarchy (in emmet):
+    //.cardControl>(button.readButton+(svg.trashSVG>svgPath))
+    cardRead = document.createElement('button');
+    cardRead.classList.add('readButton');
+    cardRead.setAttribute('data_id', `${index}`);
+
+    cardTrash = document.createElement('img');
+    cardTrash.setAttribute('src', 'img/trash-can-outline.png')
+    cardTrash.setAttribute('data_id', `${index}`);
+    cardTrash.classList.add('trash');
+    /*cardSVG = document.createElement('svg');
+    cardSVG.setAttribute('style',"width:3rem;height:3rem")
+    cardSVG.setAttribute('viewBox',"0 0 24 24")
+
+    svgPath = document.createElement('path');
+    svgPath.setAttribute('fill',"black");
+    svgPath.setAttribute('d', "M9,3V4H4V6H5V19A2,2 0 0,0 7,21H17A2,2 0 0,0 19,19V6H20V4H15V3H9M7,6H17V19H7V6M9,8V17H11V8H9M13,8V17H15V8H13Z");
+    */
+
+    cardControl = document.createElement('div');
+    cardControl.classList.add('cardControl');
+
+    //cardSVG.appendChild(svgPath);
+    cardControl.appendChild(cardRead);
+    cardControl.appendChild(cardTrash);
+    //cardControl.appendChild(cardSVG);
 
     //write all pertinent text to elements
     cardTitle.textContent = `TITLE: ${this.title}`;
     cardAuthor.textContent = `AUTHOR: ${this.author}`;
     cardPages.textContent = `PAGES: ${this.pages}`;
-    cardRead.textContent = `READ: ${this.read}`;
+    cardRead.textContent = `${this.read}`;
 
     //append text elements to card
     cardDiv.appendChild(cardTitle);
     cardDiv.appendChild(cardAuthor);
     cardDiv.appendChild(cardPages);
-    cardDiv.appendChild(cardRead);
+    cardDiv.appendChild(cardControl);
 
     //append card to container
     library_container.appendChild(cardDiv);
@@ -60,21 +86,54 @@ let drawMyLibrary = function (){
     for(let i = 0; i < myLibrary.length; i++){
         myLibrary[i].drawCard(i);
     }
+
+    //gather button and trash elements
+    trashButtons = document.querySelectorAll('.trash');
+    readToggleButtons = document.querySelectorAll('.readButton');
+
+    //add event listener for trash buttons
+    trashButtons.forEach(trashButton => {
+        trashButton.addEventListener('click', ()=>{
+            myLibrary.splice(Number(trashButton.getAttribute('data_id')), 1);
+            drawMyLibrary();
+        });
+    });
+
+    //add event listeners for Read buttons
+    readToggleButtons.forEach(readToggleButton => {
+        readToggleButton.addEventListener('click', (e)=>{
+            e.preventDefault();
+            let foo = Number(readToggleButton.getAttribute('data_id'));
+            if(myLibrary[foo].read == 'UNREAD'){
+                myLibrary[foo].read = 'READ';
+                readToggleButton.textContent = 'READ';
+            }
+            else{
+                myLibrary[foo].read = 'UNREAD';
+                readToggleButton.textContent = 'UNREAD';
+            }
+            
+        });
+    });
 }
 
 //adds book to library
 function addBookToLibrary() {    
+    //check to make sure form is filled out first!
+
+    /*************************/
+    /* if form is filled out */
+    /*************************/
     if(input_title.value != '' && input_author.value != '' && input_pages.value != ''){
-    //create new book object
     let newBook = new Book(input_title.value, input_author.value, input_pages.value, checkPlease());
-
-    //add new book object to array
-    myLibrary.push(newBook);
-
-    //add book card to DOM
-    //newBook.drawCard();
+    myLibrary.push(newBook); 
     drawMyLibrary();
+    delete newBook; 
     }
+
+    /*****************************/
+    /* if form is not filled out */
+    /*****************************/
     else{
         alert('Please make sure to fill out all book information!')
     }
@@ -98,10 +157,10 @@ function clearForm(){
 //processes checkbox output to usable string for Book constructor
 function checkPlease(){
     if (input_read.checked){
-         return 'yes';
+         return 'READ';
     }
     else if (!input_read.checked){
-        return 'no';
+        return 'UNREAD';
     }
     else{
         return 'fallback';

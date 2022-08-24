@@ -198,3 +198,17 @@ input{
     justify-content: center;
     gap: 5rem;
 }
+
+.trash:hover{
+    opacity: 1;
+}
+
+.trash{
+    opacity: .8;
+}
+
+.cardControl{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
